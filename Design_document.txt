@@ -1,0 +1,8 @@
+#### Design Document n-puzzle
+## Describes the choices that were made for the creation of the android app 'n-puzzle'
+
+Jordi van Ditmar
+Studentnumber: 10875875
+
+
+N-puzzle is a game where a picture is devided into tiles, which are then shuffled. It is up to the player to  
