@@ -4,5 +4,13 @@
     <string name="app_name">nPuzzle10875875</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="choose_img">Choose an image:</string>
+    <string name="title_activity_game_play">GamePlay</string>
+    <string name="easy">easy</string>
+    <string name="medium">medium</string>
+    <string name="hard">hard</string>
+    <string name="reshuffle">reshuffle</string>
+    <string name="change_difficulty">change difficulty</string>
+    <string name="change_image">change image</string>
 
 </resources>

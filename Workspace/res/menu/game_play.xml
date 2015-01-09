@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="nl.mprog.projects.npuzzle10875875.GamePlay" >
+
+    <item
+        android:id="@+id/reshuffle"
+        android:orderInCategory="100"
+        android:title="@string/reshuffle"
+        app:showAsAction="never"/>
+    <item android:id="@+id/change_difficulty" android:title="@string/change_difficulty">
+        <menu>
+            <item android:id="@+id/easy" android:title="@string/easy"/>
+            <item android:id="@+id/medium" android:title="@string/medium"/>
+            <item android:id="@+id/hard" android:title="@string/hard"/>
+        </menu>
+    </item>
+    <item android:id="@+id/change_image" android:title="@string/change_image"></item>
+
+</menu>
