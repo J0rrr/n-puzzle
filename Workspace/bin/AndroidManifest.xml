@@ -24,7 +24,13 @@
         </activity>
         <activity
             android:name=".GamePlay"
-            android:label="@string/title_activity_game_play" >
+            android:label="@string/title_activity_game_play"
+            android:theme="@style/FullscreenTheme" >
+        </activity>
+        <activity
+            android:name=".YouWin"
+            android:label="@string/title_activity_you_win"
+            android:theme="@style/FullscreenTheme" >
         </activity>
     </application>
 

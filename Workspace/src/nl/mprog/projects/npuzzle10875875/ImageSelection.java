@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,26 +21,38 @@ public class ImageSelection extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.image_selection);
 		
-		//TODO replace hardcoded puzzle names
-		String[] puzzles = {"Puzzle 1", "Puzzle 2", "Puzzle 3", "Puzzle 4", "Puzzle 5", "Puzzle 6"};
+		// if an old puzzle still exists, open it		
+		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+		if (gameSave.contains("Moves")) {
+			Intent intent = new Intent(ImageSelection.this, GamePlay.class);
+			startActivity(intent);
+		}
+		
 		
 		// set the custom list adapter to the listview
-        ListAdapter listAdapter = new CustomAdapter(this, puzzles);
-        ListView lstV = (ListView) findViewById(R.id.lstV_choose_img);
-        lstV.setAdapter(listAdapter);
+		ListAdapter listAdapter = new ImageAdapter(this);
+		ListView lstView = (ListView) findViewById(R.id.lstV_choose_img);
+		lstView.setAdapter(listAdapter);
+ 
 
-        // handle clicks on the list items
-        lstV.setOnItemClickListener(
-                new AdapterView.OnItemClickListener(){
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String puzzles = String.valueOf(parent.getItemAtPosition(position));
-                        
-                        // start new gameplay activity
-                        Intent intent = new Intent(ImageSelection.this, GamePlay.class);
-                        startActivity(intent);
-                    }
+		// handle clicks on the list items
+		lstView.setOnItemClickListener(
+			new AdapterView.OnItemClickListener(){
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    //String puzzles = String.valueOf(parent.getItemAtPosition(position));
+                	
+                	// save selected image to shared preferences
+                	SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+                	SharedPreferences.Editor editor = gameSave.edit();
+                	editor.putInt("imageID", (int) id);
+                	editor.commit();
+                	                    	
+                    // start new gameplay activity
+                    Intent intent = new Intent(ImageSelection.this, GamePlay.class);
+                    startActivity(intent);
                 }
+            }
         );
 	}
 }

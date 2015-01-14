@@ -12,5 +12,8 @@
     <string name="reshuffle">reshuffle</string>
     <string name="change_difficulty">change difficulty</string>
     <string name="change_image">change image</string>
+    <string name="title_activity_you_win">YouWin</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>
