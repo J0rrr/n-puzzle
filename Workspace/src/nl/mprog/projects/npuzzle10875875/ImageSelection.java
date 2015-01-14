@@ -45,6 +45,7 @@ public class ImageSelection extends Activity {
                 	// save selected image to shared preferences
                 	SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
                 	SharedPreferences.Editor editor = gameSave.edit();
+                	editor.clear();
                 	editor.putInt("imageID", (int) id);
                 	editor.commit();
                 	                    	

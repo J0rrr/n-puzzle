@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -56,12 +57,7 @@ public class GamePlay extends Activity {
 		loadData();
 		cutImageToPieces();
 		generateGridView();
-		drawImages();
 		handleClick();
-
-		// wait for click
-			// process moves
-			// if won: go to YouWin (DONT FORGET TO DELETE PREFS)		
 	}
 	
 	public void onPause() {
@@ -71,6 +67,10 @@ public class GamePlay extends Activity {
 		saveData();
 	}
 	
+	public void shuffleTiles() {
+		
+	}
+	
 	public void generateGridView() {
 		gridView = (GridView) findViewById(R.id.grid_view);
 		gridView.setNumColumns(dimension);
@@ -78,59 +78,63 @@ public class GamePlay extends Activity {
 		ViewGroup.LayoutParams layoutParams = gridView.getLayoutParams();
 		layoutParams.width = cellWidth * dimension;
 		layoutParams.height = cellHeight * dimension;
-		gridView.setLayoutParams(layoutParams);		
-	}
-	
-	public void drawImages() {
+		gridView.setLayoutParams(layoutParams);
+		
 		imgAdapter = new ImageAdapter(this);
-		gridView.setAdapter(imgAdapter);
+		gridView.setAdapter(imgAdapter);		
 	}
 	
 	public void handleClick() {
 		gridView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				//Toast.makeText(GamePlay.this, "" + position, Toast.LENGTH_SHORT).show();
 				
 				// ACTUAL BRAINS OF THE GAME
 				int cur_x = position % dimension;
 				int cur_y = position / dimension;
 				
+				int empty_tile = dimension * dimension - 1;
+				
 				// check to the right of tapped tile for empty tile
-				if ((cur_x + 1 < dimension) && (cellArray[cur_x + 1][cur_y] == 0)) {
+				if ((cur_x + 1 < dimension) && (cellArray[cur_x + 1][cur_y] == empty_tile)) {
 					cellArray[cur_x + 1][cur_y] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = 0;
+					cellArray[cur_x][cur_y] = empty_tile;
 					imageArray[position + 1] = imageArray[position];
 					imageArray[position] = null;
+					moves++;
 				}
 				
 				// check to the left of tapped tile for empty tile
-				else if ((cur_x - 1 >= 0) && (cellArray[cur_x - 1][cur_y] == 0)) {
+				else if ((cur_x - 1 >= 0) && (cellArray[cur_x - 1][cur_y] == empty_tile)) {
 					cellArray[cur_x - 1][cur_y] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = 0;
+					cellArray[cur_x][cur_y] = empty_tile;
 					imageArray[position - 1] = imageArray[position];
 					imageArray[position] = null;
-				}
-				
-				// check above tapped tile for empty tile
-				else if ((cur_y + 1 < dimension) && (cellArray[cur_x][cur_y + 1] == 0)) {
-					cellArray[cur_x][cur_y + 1] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = 0;
-					imageArray[position + dimension] = imageArray[position];
-					imageArray[position] = null;
+					moves++;
 				}
 				
 				// check below tapped tile for empty tile
-				else if ((cur_y - 1 >= 0) && (cellArray[cur_x][cur_y - 1] == 0)) {
+				else if ((cur_y + 1 < dimension) && (cellArray[cur_x][cur_y + 1] == empty_tile)) {
+					cellArray[cur_x][cur_y + 1] = cellArray[cur_x][cur_y];
+					cellArray[cur_x][cur_y] = empty_tile;
+					imageArray[position + dimension] = imageArray[position];
+					imageArray[position] = null;
+					moves++;
+				}
+				
+				// check above tapped tile for empty tile
+				else if ((cur_y - 1 >= 0) && (cellArray[cur_x][cur_y - 1] == empty_tile)) {
 					cellArray[cur_x][cur_y - 1] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = 0;
+					cellArray[cur_x][cur_y] = empty_tile;
 					imageArray[position - dimension] = imageArray[position];
 					imageArray[position] = null;
+					moves++;
 				}
 				
 				else {
 					Toast.makeText(GamePlay.this, "Invalid move!", Toast.LENGTH_SHORT).show();
-				}
+				}				
 				
+				checkIfWon();
 				imgAdapter.notifyDataSetChanged();
 			}
         });
@@ -162,14 +166,30 @@ public class GamePlay extends Activity {
 	            imageView = new ImageView(mContext);
 	            imageView.setLayoutParams(new GridView.LayoutParams(cellWidth, cellHeight));
 	            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-	            imageView.setPadding(5, 5, 5, 5);
+	            imageView.setPadding(3, 3, 3, 3);
+	            imageView.setBackgroundColor(Color.BLACK);
 	        } else {
 	            imageView = (ImageView) convertView;
 	        }
+	        
+	        imageView.setImageBitmap(imageArray[position]);  
 
-	        imageView.setImageBitmap(imageArray[position]);
 	        return imageView;
 	    }
+	}
+	
+	public boolean checkIfWon() {
+		for(int x = 0; x < dimension; x++) {
+			for(int y = 0; y < dimension; y++) {
+				if (cellArray[x][y] != (x % dimension) + (y * dimension)) {
+					return false;
+				}
+			}
+		}    	                    	
+        // start the YouWin activity
+        Intent intent = new Intent(GamePlay.this, YouWin.class);
+        startActivity(intent);
+		return true;
 	}
 	
 	public void loadData() {
@@ -186,14 +206,10 @@ public class GamePlay extends Activity {
 		
 		for(int x = 0; x < dimension; x++) {
 			for(int y = 0; y < dimension; y++) {
-				defaultCellArray[x][y] = 1 + (x % dimension) + (y / dimension);
+				defaultCellArray[x][y] = (x % dimension) + (y * dimension);
 				cellArray[x][y] = gameSave.getInt("cellArray_" + x + y, defaultCellArray[x][y]);
 			}
-		}
-		
-		// set the 'empty' tile
-		cellArray[dimension - 1][dimension - 1] = 0;
-		
+		}		
 		
 		// get screen width and height
 	 	screenWidth = this.getResources().getDisplayMetrics().widthPixels;
@@ -205,7 +221,7 @@ public class GamePlay extends Activity {
     	SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
     	SharedPreferences.Editor editor = gameSave.edit();
     	editor.putInt("dimension", dimension);
-    	editor.putLong("imageID", imageID);
+    	editor.putInt("imageID", imageID);
     	editor.putInt("moves", moves);
     	
     	for(int x = 0; x < dimension; x++)

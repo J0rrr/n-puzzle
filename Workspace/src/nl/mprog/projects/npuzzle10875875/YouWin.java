@@ -30,12 +30,14 @@ public class YouWin extends Activity {
         
 		setContentView(R.layout.you_win);
 		
+		// load the data to be displayed
 		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+		int imageID;
+		imageID = gameSave.getInt("imageID", 0);
 		
-		int imageID = gameSave.getInt("imageID", 0);
-		
+		// display the competed image
 		ImageView imgView = (ImageView) findViewById(R.id.you_win_image);
-		Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), (int) imageID);
+		Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), imageID);
 		imgView.setImageBitmap(bitmap);
 	}
 }
