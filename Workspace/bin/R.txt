@@ -356,7 +356,6 @@ int drawable puzzle_0 0x7f020034
 int drawable puzzle_1 0x7f020035
 int drawable puzzle_2 0x7f020036
 int drawable puzzle_3 0x7f020037
-int drawable puzzle_4 0x7f020038
 int id action_bar 0x7f090042
 int id action_bar_activity_content 0x7f090003
 int id action_bar_container 0x7f090041

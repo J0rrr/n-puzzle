@@ -35,7 +35,7 @@ public class ImageSelection extends Activity {
 		
 		// if an old puzzle still exists, open it		
 		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
-		if (gameSave.contains("moves")) {
+		if (gameSave.contains("cellArray_00")) {
 			Intent intent = new Intent(ImageSelection.this, GamePlay.class);
 			startActivity(intent);
 			ImageSelection.this.finish();

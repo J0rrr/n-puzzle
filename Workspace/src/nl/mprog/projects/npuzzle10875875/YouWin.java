@@ -17,6 +17,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * @author 	Jordi van Ditmar
@@ -26,6 +27,8 @@ import android.widget.TextView;
 
 public class YouWin extends Activity {
 	int dimension;
+	int moves;
+	int imageID;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -39,11 +42,12 @@ public class YouWin extends Activity {
 	}
 	
 	public void onResume() {
+		super.onPause();
 		// load the data to be displayed
 		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
-		int imageID = gameSave.getInt("imageID", 0);
-		int moves = gameSave.getInt("moves", 99999);
 		dimension = gameSave.getInt("dimension", 4);
+		imageID = gameSave.getInt("imageID", R.drawable.puzzle_0);
+		moves = gameSave.getInt("moves", 0);
 		
 		// display the competed image (with text)
 		ImageView imgView = (ImageView) findViewById(R.id.you_win_image);
@@ -56,10 +60,18 @@ public class YouWin extends Activity {
 	public void onPause() {
 		super.onPause();
 		
+
+	}
+	
+	public void onBtnClick(View view) {
 		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
     	SharedPreferences.Editor editor = gameSave.edit();
 		editor.clear();
 		editor.putInt("dimension", dimension);
-		editor.commit();
+		editor.commit();		
+		
+        Intent intent = new Intent(YouWin.this, ImageSelection.class);
+        startActivity(intent);
+		YouWin.this.finish();	
 	}
 }

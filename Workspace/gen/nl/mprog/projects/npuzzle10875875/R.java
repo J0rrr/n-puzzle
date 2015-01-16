@@ -1870,7 +1870,6 @@ containing a value of this type.
         public static final int puzzle_1=0x7f020035;
         public static final int puzzle_2=0x7f020036;
         public static final int puzzle_3=0x7f020037;
-        public static final int puzzle_4=0x7f020038;
     }
     public static final class id {
         public static final int action_bar=0x7f090042;
