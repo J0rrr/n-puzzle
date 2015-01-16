@@ -14,6 +14,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * @author 	Jordi van Ditmar
+ * 			jorditmar@hotmail.com
+ * 			Student ID: 10875875
+ */
 
 class ImageAdapter extends BaseAdapter {
 	

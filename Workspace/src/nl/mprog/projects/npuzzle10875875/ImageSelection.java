@@ -14,6 +14,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * @author 	Jordi van Ditmar
+ * 			jorditmar@hotmail.com
+ * 			Student ID: 10875875
+ */
+
 public class ImageSelection extends Activity {
 	
 	@Override
@@ -21,11 +27,18 @@ public class ImageSelection extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.image_selection);
 		
+		// clear shared preferences
+//		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+//    	SharedPreferences.Editor editor = gameSave.edit();
+//		editor.clear();
+//		editor.commit();
+		
 		// if an old puzzle still exists, open it		
 		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
-		if (gameSave.contains("Moves")) {
+		if (gameSave.contains("moves")) {
 			Intent intent = new Intent(ImageSelection.this, GamePlay.class);
 			startActivity(intent);
+			ImageSelection.this.finish();
 		}
 		
 		
@@ -45,13 +58,13 @@ public class ImageSelection extends Activity {
                 	// save selected image to shared preferences
                 	SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
                 	SharedPreferences.Editor editor = gameSave.edit();
-                	editor.clear();
                 	editor.putInt("imageID", (int) id);
                 	editor.commit();
                 	                    	
                     // start new gameplay activity
                     Intent intent = new Intent(ImageSelection.this, GamePlay.class);
                     startActivity(intent);
+        			ImageSelection.this.finish();
                 }
             }
         );

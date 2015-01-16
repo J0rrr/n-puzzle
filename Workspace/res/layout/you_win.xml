@@ -8,5 +8,22 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:src="@drawable/ic_launcher" />
+    
+	<TextView
+        android:id="@+id/you_win_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="60dp"
+        android:layout_centerHorizontal="true" />
+
+	<Button
+	    android:id="@+id/you_win_button"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentBottom="true"
+	    android:layout_centerHorizontal="true"
+	    android:layout_marginBottom="60dp"
+	    android:text="Return to image selection" />
 
 </RelativeLayout>

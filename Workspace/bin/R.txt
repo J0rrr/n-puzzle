@@ -370,7 +370,7 @@ int id action_menu_presenter 0x7f090006
 int id action_mode_bar 0x7f09003f
 int id action_mode_bar_stub 0x7f09003e
 int id action_mode_close_button 0x7f090031
-int id action_settings 0x7f09005c
+int id action_settings 0x7f09005e
 int id activity_chooser_view_content 0x7f090032
 int id alignBounds 0x7f09000b
 int id alignMargins 0x7f09000c
@@ -380,8 +380,8 @@ int id bottom 0x7f09000d
 int id center 0x7f09000e
 int id center_horizontal 0x7f09000f
 int id center_vertical 0x7f090010
-int id change_difficulty 0x7f090057
-int id change_image 0x7f09005b
+int id change_difficulty 0x7f090059
+int id change_image 0x7f09005d
 int id checkbox 0x7f09003a
 int id clip_horizontal 0x7f090011
 int id clip_vertical 0x7f090012
@@ -391,7 +391,7 @@ int id default_activity_button 0x7f090035
 int id dialog 0x7f09002b
 int id disableHome 0x7f09001f
 int id dropdown 0x7f09002c
-int id easy 0x7f090058
+int id easy 0x7f09005a
 int id edit_query 0x7f090044
 int id end 0x7f090013
 int id expand_activities_button 0x7f090033
@@ -400,7 +400,7 @@ int id fill 0x7f090014
 int id fill_horizontal 0x7f090015
 int id fill_vertical 0x7f090016
 int id grid_view 0x7f090050
-int id hard 0x7f09005a
+int id hard 0x7f09005c
 int id home 0x7f090000
 int id homeAsUp 0x7f090020
 int id horizontal 0x7f090009
@@ -412,7 +412,7 @@ int id left 0x7f090017
 int id listMode 0x7f09001c
 int id list_item 0x7f090036
 int id lstV_choose_img 0x7f090052
-int id medium 0x7f090059
+int id medium 0x7f09005b
 int id middle 0x7f09002e
 int id never 0x7f090029
 int id none 0x7f090021
@@ -420,7 +420,7 @@ int id normal 0x7f09001d
 int id progress_circular 0x7f090007
 int id progress_horizontal 0x7f090008
 int id radio 0x7f09003c
-int id reshuffle 0x7f090056
+int id reshuffle 0x7f090058
 int id right 0x7f090018
 int id search_badge 0x7f090046
 int id search_bar 0x7f090045
@@ -449,7 +449,9 @@ int id useLogo 0x7f090025
 int id vertical 0x7f09000a
 int id withText 0x7f09002a
 int id wrap_content 0x7f09001b
+int id you_win_button 0x7f090057
 int id you_win_image 0x7f090055
+int id you_win_text 0x7f090056
 int integer abc_max_action_buttons 0x7f080000
 int layout abc_action_bar_title_item 0x7f030000
 int layout abc_action_bar_up_container 0x7f030001

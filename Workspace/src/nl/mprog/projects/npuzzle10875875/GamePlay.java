@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+
+/**
+ * @author 	Jordi van Ditmar
+ * 			jorditmar@hotmail.com
+ * 			Student ID: 10875875
+ */
 
 public class GamePlay extends Activity {
 	
@@ -37,6 +44,7 @@ public class GamePlay extends Activity {
 	private ImageAdapter imgAdapter;
 	private int screenWidth;
 	private int screenHeight;
+	private boolean doSave;
 	
 
 	@Override
@@ -53,22 +61,57 @@ public class GamePlay extends Activity {
 	
 	public void onResume() {
 		super.onResume();
-
 		loadData();
-		cutImageToPieces();
-		generateGridView();
-		handleClick();
+		doSave = true;
+		
+		//Toast.makeText(GamePlay.this, "Moves: " + moves, Toast.LENGTH_SHORT).show();
+		
+		cutImageToPieces();		
+		generateGridView();		
+		
+		if (moves == 0) {
+			// wait for 3 seconds
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+			    @Override
+			    public void run() {
+			        // Do this after 3000 milliseconds
+			        shuffleTiles();
+			        handleClick();
+			    }
+			}, 3000);
+		}
+		else {
+	        handleClick();
+		}
 	}
 	
 	public void onPause() {
 		super.onPause();
 		
 		// save to sharedprefs
-		saveData();
+		if (doSave == true)
+			saveData();
 	}
 	
 	public void shuffleTiles() {
+		// put the tiles in reversed order 
+		// (from left to right, up to down: counting from dimension^2 to 0)
+		for(int x = 0; x < dimension; x++) {
+			for(int y = 0; y < dimension; y++) {
+				cellArray[x][y] = dimension * dimension - 2 - ((x % dimension) + (y * dimension));
+			}
+		}
+		// set the empty tile to be the lower right one
+		cellArray[dimension - 1][dimension - 1] = dimension * dimension - 1;
 		
+		// swap the two tiles next to the empty tile when necessary
+		if (dimension % 2 == 0) {
+			cellArray[dimension - 2][dimension - 1] = 1;
+			cellArray[dimension - 3][dimension - 1] = 0;
+		}
+		
+		imgAdapter.notifyDataSetChanged();
 	}
 	
 	public void generateGridView() {
@@ -81,7 +124,9 @@ public class GamePlay extends Activity {
 		gridView.setLayoutParams(layoutParams);
 		
 		imgAdapter = new ImageAdapter(this);
-		gridView.setAdapter(imgAdapter);		
+		gridView.setAdapter(imgAdapter);	
+		
+		imgAdapter.notifyDataSetChanged();
 	}
 	
 	public void handleClick() {
@@ -98,8 +143,6 @@ public class GamePlay extends Activity {
 				if ((cur_x + 1 < dimension) && (cellArray[cur_x + 1][cur_y] == empty_tile)) {
 					cellArray[cur_x + 1][cur_y] = cellArray[cur_x][cur_y];
 					cellArray[cur_x][cur_y] = empty_tile;
-					imageArray[position + 1] = imageArray[position];
-					imageArray[position] = null;
 					moves++;
 				}
 				
@@ -107,8 +150,6 @@ public class GamePlay extends Activity {
 				else if ((cur_x - 1 >= 0) && (cellArray[cur_x - 1][cur_y] == empty_tile)) {
 					cellArray[cur_x - 1][cur_y] = cellArray[cur_x][cur_y];
 					cellArray[cur_x][cur_y] = empty_tile;
-					imageArray[position - 1] = imageArray[position];
-					imageArray[position] = null;
 					moves++;
 				}
 				
@@ -116,8 +157,6 @@ public class GamePlay extends Activity {
 				else if ((cur_y + 1 < dimension) && (cellArray[cur_x][cur_y + 1] == empty_tile)) {
 					cellArray[cur_x][cur_y + 1] = cellArray[cur_x][cur_y];
 					cellArray[cur_x][cur_y] = empty_tile;
-					imageArray[position + dimension] = imageArray[position];
-					imageArray[position] = null;
 					moves++;
 				}
 				
@@ -125,8 +164,6 @@ public class GamePlay extends Activity {
 				else if ((cur_y - 1 >= 0) && (cellArray[cur_x][cur_y - 1] == empty_tile)) {
 					cellArray[cur_x][cur_y - 1] = cellArray[cur_x][cur_y];
 					cellArray[cur_x][cur_y] = empty_tile;
-					imageArray[position - dimension] = imageArray[position];
-					imageArray[position] = null;
 					moves++;
 				}
 				
@@ -171,8 +208,9 @@ public class GamePlay extends Activity {
 	        } else {
 	            imageView = (ImageView) convertView;
 	        }
-	        
-	        imageView.setImageBitmap(imageArray[position]);  
+	        int y = position / dimension;
+	        int x = position % dimension;
+	        imageView.setImageBitmap(imageArray[cellArray[x][y]]);
 
 	        return imageView;
 	    }
@@ -188,7 +226,9 @@ public class GamePlay extends Activity {
 		}    	                    	
         // start the YouWin activity
         Intent intent = new Intent(GamePlay.this, YouWin.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
+		GamePlay.this.finish();
 		return true;
 	}
 	
@@ -234,7 +274,34 @@ public class GamePlay extends Activity {
 	}
 	
 	public void deleteData() {
+    	SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+    	SharedPreferences.Editor editor = gameSave.edit();
+    	
+    	editor.remove("moves");
+    	moves = 0;
+    	
+    	for(int x = 0; x < dimension; x++) {
+        	for(int y = 0; y < dimension; y++) {
+        		editor.remove("cellArray_" + x + y);
+    			cellArray[x][y] = (x % dimension) + (y * dimension);
+        	}
+    	}
+    	editor.commit();
+	}
+	
+	public void reload() {
+        Intent intent = new Intent(GamePlay.this, GamePlay.class);
+        startActivity(intent);
+		GamePlay.this.finish();
 		
+//		
+//	    Intent intent = getIntent();
+//	    overridePendingTransition(0, 0);
+//	    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//	    finish();
+//
+//	    overridePendingTransition(0, 0);
+//	    startActivity(intent);
 	}
 	
 	public void cutImageToPieces() {
@@ -294,27 +361,74 @@ public class GamePlay extends Activity {
 		}
 		
 		if (id == R.id.easy) {
-			Toast.makeText(GamePlay.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+			dimension = 3;
+			
+			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+	    	SharedPreferences.Editor editor = gameSave.edit();
+			editor.clear();
+			editor.putInt("dimension", dimension);
+	    	editor.putInt("imageID", imageID);
+			editor.commit();
+			doSave = false;
+
+			reload();
 			return true;
 		}
 		
 		if (id == R.id.medium) {
-			Toast.makeText(GamePlay.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+			dimension = 4;
+			
+			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+	    	SharedPreferences.Editor editor = gameSave.edit();
+			editor.clear();
+			editor.putInt("dimension", dimension);
+	    	editor.putInt("imageID", imageID);
+			editor.commit();
+			doSave = false;
+
+			reload();
 			return true;
 		}
 		
 		if (id == R.id.hard) {
-			Toast.makeText(GamePlay.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+			dimension = 5;
+			
+			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+	    	SharedPreferences.Editor editor = gameSave.edit();
+			editor.clear();
+			editor.putInt("dimension", dimension);
+	    	editor.putInt("imageID", imageID);
+			editor.commit();
+			doSave = false;
+
+			reload();
 			return true;
 		}
 		
-		if (id == R.id.change_image) {
-			Toast.makeText(GamePlay.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+		if (id == R.id.change_image) {			
+			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+	    	SharedPreferences.Editor editor = gameSave.edit();
+			editor.clear();
+			editor.putInt("dimension", dimension);
+			editor.commit();
+			doSave = false;
+			
+            Intent intent = new Intent(GamePlay.this, ImageSelection.class);
+            startActivity(intent);
+			GamePlay.this.finish();			
+			
+			
 			return true;
 		}
 		
 		if (id == R.id.reshuffle) {
-			Toast.makeText(GamePlay.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+			Toast.makeText(GamePlay.this, "Reshuffle", Toast.LENGTH_SHORT).show();
+
+			deleteData();
+			doSave = false;
+			
+			reload();
+
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

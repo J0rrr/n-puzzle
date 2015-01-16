@@ -1886,7 +1886,7 @@ containing a value of this type.
         public static final int action_mode_bar=0x7f09003f;
         public static final int action_mode_bar_stub=0x7f09003e;
         public static final int action_mode_close_button=0x7f090031;
-        public static final int action_settings=0x7f09005c;
+        public static final int action_settings=0x7f09005e;
         public static final int activity_chooser_view_content=0x7f090032;
         public static final int alignBounds=0x7f09000b;
         public static final int alignMargins=0x7f09000c;
@@ -1896,8 +1896,8 @@ containing a value of this type.
         public static final int center=0x7f09000e;
         public static final int center_horizontal=0x7f09000f;
         public static final int center_vertical=0x7f090010;
-        public static final int change_difficulty=0x7f090057;
-        public static final int change_image=0x7f09005b;
+        public static final int change_difficulty=0x7f090059;
+        public static final int change_image=0x7f09005d;
         public static final int checkbox=0x7f09003a;
         public static final int clip_horizontal=0x7f090011;
         public static final int clip_vertical=0x7f090012;
@@ -1907,7 +1907,7 @@ containing a value of this type.
         public static final int dialog=0x7f09002b;
         public static final int disableHome=0x7f09001f;
         public static final int dropdown=0x7f09002c;
-        public static final int easy=0x7f090058;
+        public static final int easy=0x7f09005a;
         public static final int edit_query=0x7f090044;
         public static final int end=0x7f090013;
         public static final int expand_activities_button=0x7f090033;
@@ -1916,7 +1916,7 @@ containing a value of this type.
         public static final int fill_horizontal=0x7f090015;
         public static final int fill_vertical=0x7f090016;
         public static final int grid_view=0x7f090050;
-        public static final int hard=0x7f09005a;
+        public static final int hard=0x7f09005c;
         public static final int home=0x7f090000;
         public static final int homeAsUp=0x7f090020;
         public static final int horizontal=0x7f090009;
@@ -1928,7 +1928,7 @@ containing a value of this type.
         public static final int listMode=0x7f09001c;
         public static final int list_item=0x7f090036;
         public static final int lstV_choose_img=0x7f090052;
-        public static final int medium=0x7f090059;
+        public static final int medium=0x7f09005b;
         public static final int middle=0x7f09002e;
         public static final int never=0x7f090029;
         public static final int none=0x7f090021;
@@ -1936,7 +1936,7 @@ containing a value of this type.
         public static final int progress_circular=0x7f090007;
         public static final int progress_horizontal=0x7f090008;
         public static final int radio=0x7f09003c;
-        public static final int reshuffle=0x7f090056;
+        public static final int reshuffle=0x7f090058;
         public static final int right=0x7f090018;
         public static final int search_badge=0x7f090046;
         public static final int search_bar=0x7f090045;
@@ -1965,7 +1965,9 @@ containing a value of this type.
         public static final int vertical=0x7f09000a;
         public static final int withText=0x7f09002a;
         public static final int wrap_content=0x7f09001b;
+        public static final int you_win_button=0x7f090057;
         public static final int you_win_image=0x7f090055;
+        public static final int you_win_text=0x7f090056;
     }
     public static final class integer {
         /**  The maximum number of action buttons that should be permitted within
