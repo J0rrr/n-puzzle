@@ -61,26 +61,33 @@ public class GamePlay extends Activity {
 	
 	public void onResume() {
 		super.onResume();
+		
+		// load the shared preferences
 		loadData();
+		
 		doSave = true;
+				
+		// create cropped bitmap 'tiles' from the selected image
+		cutImageToPieces();	
 		
-		//Toast.makeText(GamePlay.this, "Moves: " + moves, Toast.LENGTH_SHORT).show();
-		
-		cutImageToPieces();		
+		// generate the gridview and fill it with the cropped images
 		generateGridView();		
 		
+		// if no move has been done yet, preview the solution for 3 seconds
 		if (moves == 0) {
 			// wait for 3 seconds
 			final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 			    @Override
 			    public void run() {
-			        // Do this after 3000 milliseconds
+			        // After 3000 milliseconds, shuffle the board and wait for clicks
 			        shuffleTiles();
 			        handleClick();
 			    }
 			}, 3000);
 		}
+		
+		// else, wait for clicks right away
 		else {
 	        handleClick();
 		}
@@ -89,12 +96,18 @@ public class GamePlay extends Activity {
 	public void onPause() {
 		super.onPause();
 		
-		// save to sharedprefs
+		// save to shared preferences (unless when told not to (see menu items))
 		if (doSave == true)
 			saveData();
 	}
 	
-	public void shuffleTiles() {
+	/*
+	 * 'Shuffles' the tiles. Note, this is not a true shuffle, this method
+	 * merely puts all the tiles in reversed order, puts the empty tile in
+	 * the right spot and swaps the second- and third-last tiles if
+	 * necessary (in order to make the puzzle solvable).
+	 */
+	public void shuffleTiles() {	
 		// put the tiles in reversed order 
 		// (from left to right, up to down: counting from dimension^2 to 0)
 		for(int x = 0; x < dimension; x++) {
@@ -111,29 +124,91 @@ public class GamePlay extends Activity {
 			cellArray[dimension - 3][dimension - 1] = 0;
 		}
 		
+		// notify the image adapter that its content has changed
 		imgAdapter.notifyDataSetChanged();
 	}
 	
+	/*
+	 * Generates a grid view with dimensions 'dimension' (3x3, 4x4 or 5x5).
+	 */
 	public void generateGridView() {
+		// find the right xml-file item and set the number of columns
 		gridView = (GridView) findViewById(R.id.grid_view);
 		gridView.setNumColumns(dimension);
 		
+		// set the width and height of the grids cells
 		ViewGroup.LayoutParams layoutParams = gridView.getLayoutParams();
 		layoutParams.width = cellWidth * dimension;
 		layoutParams.height = cellHeight * dimension;
 		gridView.setLayoutParams(layoutParams);
 		
+		// set the grid views image adapter
 		imgAdapter = new ImageAdapter(this);
 		gridView.setAdapter(imgAdapter);	
-		
 		imgAdapter.notifyDataSetChanged();
 	}
 	
+	/*
+	 * This is the adapter that fills the grid view with images
+	 */
+	public class ImageAdapter extends BaseAdapter {
+	    private Context mContext;
+
+	    public ImageAdapter(Context c) {
+	        mContext = c;
+	    }
+
+	    public int getCount() {
+	        return imageArray.length;
+	    }
+
+	    public Object getItem(int position) {
+	        return null;
+	    }
+
+	    public long getItemId(int position) {
+	        return 0;
+	    }
+
+	    // create a new image view for each item referenced by the adapter
+	    public View getView(int position, View convertView, ViewGroup parent) {
+	        ImageView imageView;
+	        
+	        // if there is no recyclable image view, create a new one and set its attributes
+	        if (convertView == null) {
+	            imageView = new ImageView(mContext);
+	            imageView.setLayoutParams(new GridView.LayoutParams(cellWidth, cellHeight));
+	            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+	            imageView.setPadding(3, 3, 3, 3);
+	            imageView.setBackgroundColor(Color.BLACK);
+	        
+	        // if there is a recyclable image view, use that one instead
+	        } else {
+	            imageView = (ImageView) convertView;
+	        }
+	        
+	        // base x and y on the position in the grid view
+	        int y = position / dimension;
+	        int x = position % dimension;
+	        
+	        // fill the grid items with the appropriate cropped image
+	        imageView.setImageBitmap(imageArray[cellArray[x][y]]);
+
+	        return imageView;
+	    }
+	}	
+	
+	/*
+	 * Handles when a tile is clicked during gameplay.
+	 * This method can be considered as the actual 'brains' of the game.
+	 * Here, calculations are done to check if a valid move is selected.
+	 * If so, the move is executed followed by a check for the solved board.
+	 */
 	public void handleClick() {
 		gridView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				
-				// ACTUAL BRAINS OF THE GAME
+				// derive the x- and y- coordinates clicked from the gridviews clicked position
 				int cur_x = position % dimension;
 				int cur_y = position / dimension;
 				
@@ -167,58 +242,28 @@ public class GamePlay extends Activity {
 					moves++;
 				}
 				
+				// if none of the above: print that no valid tile was clicked
 				else {
 					Toast.makeText(GamePlay.this, "Invalid move!", Toast.LENGTH_SHORT).show();
 				}				
 				
+				// check if the puzzle is solved
 				checkIfWon();
+				
+				// notify the grid view adapter that its content has changed
 				imgAdapter.notifyDataSetChanged();
 			}
         });
 	}
 	
-	public class ImageAdapter extends BaseAdapter {
-	    private Context mContext;
-
-	    public ImageAdapter(Context c) {
-	        mContext = c;
-	    }
-
-	    public int getCount() {
-	        return imageArray.length;
-	    }
-
-	    public Object getItem(int position) {
-	        return null;
-	    }
-
-	    public long getItemId(int position) {
-	        return 0;
-	    }
-
-	    // create a new ImageView for each item referenced by the Adapter
-	    public View getView(int position, View convertView, ViewGroup parent) {
-	        ImageView imageView;
-	        if (convertView == null) {  // if it's not recycled, initialize some attributes
-	            imageView = new ImageView(mContext);
-	            imageView.setLayoutParams(new GridView.LayoutParams(cellWidth, cellHeight));
-	            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-	            imageView.setPadding(3, 3, 3, 3);
-	            imageView.setBackgroundColor(Color.BLACK);
-	        } else {
-	            imageView = (ImageView) convertView;
-	        }
-	        int y = position / dimension;
-	        int x = position % dimension;
-	        imageView.setImageBitmap(imageArray[cellArray[x][y]]);
-
-	        return imageView;
-	    }
-	}
-	
+	/*
+	 * Checks if the current board is in its solved state.
+	 * Returns false if not so, opens the YouWin activity if so.
+	 */
 	public boolean checkIfWon() {
 		for(int x = 0; x < dimension; x++) {
 			for(int y = 0; y < dimension; y++) {
+				// if any of the tiles is not in its final place, return false
 				if (cellArray[x][y] != (x % dimension) + (y * dimension)) {
 					return false;
 				}
@@ -232,8 +277,13 @@ public class GamePlay extends Activity {
 		return true;
 	}
 	
+	/*
+	 * Loads data from the shared preferences.
+	 * If no data exists yet, the default data is loaded 
+	 * (second argument in the "get..." statements).
+	 */
 	public void loadData() {
-		// load data from shared preferences (if there is data)
+		// load data from shared preferences
 		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
 		
 		dimension = gameSave.getInt("dimension", 4);
@@ -256,6 +306,10 @@ public class GamePlay extends Activity {
 	 	screenHeight = this.getResources().getDisplayMetrics().heightPixels;
 	}
 	
+	/*
+	 * Saves data into the shared preferences
+	 * (very similar to the loadData() method)
+	 */
 	public void saveData() {
 		// save to shared preferences
     	SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
@@ -274,36 +328,30 @@ public class GamePlay extends Activity {
 	}
 	
 	public void deleteData() {
-    	SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
+		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
     	SharedPreferences.Editor editor = gameSave.edit();
-    	
-    	editor.remove("moves");
-    	moves = 0;
-    	
-    	for(int x = 0; x < dimension; x++) {
-        	for(int y = 0; y < dimension; y++) {
-        		editor.remove("cellArray_" + x + y);
-    			cellArray[x][y] = (x % dimension) + (y * dimension);
-        	}
-    	}
-    	editor.commit();
+		editor.clear();
+		editor.putInt("dimension", dimension);
+    	editor.putInt("imageID", imageID);
+		editor.commit();
+		moves = 0;
+		doSave = false;
 	}
 	
+	/*
+	 * Reloads the board by restarting the 'GamePlay' activity
+	 */
 	public void reload() {
         Intent intent = new Intent(GamePlay.this, GamePlay.class);
         startActivity(intent);
 		GamePlay.this.finish();
-		
-//		
-//	    Intent intent = getIntent();
-//	    overridePendingTransition(0, 0);
-//	    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//	    finish();
-//
-//	    overridePendingTransition(0, 0);
-//	    startActivity(intent);
 	}
 	
+	/*
+	 * Cuts the image with Id 'imageID' into dimension*dimension pieces.
+	 * Puts all these pieces in an array (imageArray), and replaces the last
+	 * piece with 'null', as to create an 'empty' tile.
+	 */
 	public void cutImageToPieces() {
 		// load image from image id
 		Bitmap image = BitmapFactory.decodeResource(this.getResources(), (int) imageID);
@@ -322,13 +370,13 @@ public class GamePlay extends Activity {
 		// scale the image to fit the screen (keeping its original aspect ratio)
 		Bitmap scaledImage = Bitmap.createBitmap(image, 0, 0, imageWidth, imageHeight, matrix, true);	
 		
-		// cell size
+		// calculate the gridviews cell size
 		cellWidth = scaledImage.getWidth() / dimension;
 		cellHeight = scaledImage.getHeight() / dimension;
 				
+		// create an array of ordered cropped images
 		imageArray = new Bitmap[dimension * dimension];
 		
-		// create an array of cropped images
 		int n = 0;
 		for (int y = 0; y < dimension; y++) {
 			for (int x = 0; x < dimension; x++) {
@@ -349,84 +397,59 @@ public class GamePlay extends Activity {
 		return true;
 	}
 
+	/*
+	 * Handles what happens when a menu item is clicked.
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
+		// Handle action bar item clicks here.
 		int id = item.getItemId();
+		
 		if (id == R.id.change_difficulty) {
-			//Toast.makeText(GamePlay.this, "Not implemented yet", Toast.LENGTH_SHORT).show();
 			return true;
 		}
 		
 		if (id == R.id.easy) {
+			// set the new dimension, delete the data and reload the activity
 			dimension = 3;
-			
-			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
-	    	SharedPreferences.Editor editor = gameSave.edit();
-			editor.clear();
-			editor.putInt("dimension", dimension);
-	    	editor.putInt("imageID", imageID);
-			editor.commit();
-			doSave = false;
-
+			deleteData();
 			reload();
+			
 			return true;
 		}
 		
 		if (id == R.id.medium) {
+			// set the new dimension, delete the data and reload the activity
 			dimension = 4;
-			
-			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
-	    	SharedPreferences.Editor editor = gameSave.edit();
-			editor.clear();
-			editor.putInt("dimension", dimension);
-	    	editor.putInt("imageID", imageID);
-			editor.commit();
-			doSave = false;
-
+			deleteData();
 			reload();
+			
 			return true;
 		}
 		
 		if (id == R.id.hard) {
+			// set the new dimension, delete the data and reload the activity
 			dimension = 5;
-			
-			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
-	    	SharedPreferences.Editor editor = gameSave.edit();
-			editor.clear();
-			editor.putInt("dimension", dimension);
-	    	editor.putInt("imageID", imageID);
-			editor.commit();
-			doSave = false;
-
+			deleteData();
 			reload();
+			
 			return true;
 		}
 		
-		if (id == R.id.change_image) {			
-			SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
-	    	SharedPreferences.Editor editor = gameSave.edit();
-			editor.clear();
-			editor.putInt("dimension", dimension);
-			editor.commit();
-			doSave = false;
-			
+		if (id == R.id.change_image) {
+			// delete the data and start the ImageSelection activity
+			deleteData();
+
             Intent intent = new Intent(GamePlay.this, ImageSelection.class);
             startActivity(intent);
-			GamePlay.this.finish();			
-			
+			GamePlay.this.finish();
 			
 			return true;
 		}
 		
 		if (id == R.id.reshuffle) {
-			Toast.makeText(GamePlay.this, "Reshuffle", Toast.LENGTH_SHORT).show();
-
+			// delete the data and reload the activity
 			deleteData();
-			doSave = false;
-			
 			reload();
 
 			return true;
