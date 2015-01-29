@@ -44,14 +44,14 @@ public class GamePlay extends Activity {
 	private ImageAdapter imgAdapter;
 	private int screenWidth;
 	private int screenHeight;
-	private boolean doSave;
+	private boolean newGame;
 	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		// set to fullscreen
+		// set to fill the entire screen
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -65,23 +65,22 @@ public class GamePlay extends Activity {
 		// load the shared preferences
 		loadData();
 		
-		doSave = true;
-				
 		// create cropped bitmap 'tiles' from the selected image
 		cutImageToPieces();	
 		
-		// generate the gridview and fill it with the cropped images
+		// generate the gridview and fill it with the cropped images 
+		// (in the 'solved' order)
 		generateGridView();		
 		
 		// if no move has been done yet, preview the solution for 3 seconds
-		if (moves == 0) {
-			// wait for 3 seconds
+		if (newGame == true) {
+			// wait 3 seconds
 			final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 			    @Override
 			    public void run() {
-			        // After 3000 milliseconds, shuffle the board and wait for clicks
-			        shuffleTiles();
+			        // After 3 seconds, shuffle the board and wait for clicks
+			        shufflemptys();
 			        handleClick();
 			    }
 			}, 3000);
@@ -91,13 +90,15 @@ public class GamePlay extends Activity {
 		else {
 	        handleClick();
 		}
+		
+		newGame = false;
 	}
 	
 	public void onPause() {
 		super.onPause();
 		
-		// save to shared preferences (unless when told not to (see menu items))
-		if (doSave == true)
+		// save to shared preferences (unless when told not to, see menu items)
+		if (newGame == false)
 			saveData();
 	}
 	
@@ -107,14 +108,16 @@ public class GamePlay extends Activity {
 	 * the right spot and swaps the second- and third-last tiles if
 	 * necessary (in order to make the puzzle solvable).
 	 */
-	public void shuffleTiles() {	
+	public void shufflemptys() {	
 		// put the tiles in reversed order 
 		// (from left to right, up to down: counting from dimension^2 to 0)
 		for(int x = 0; x < dimension; x++) {
 			for(int y = 0; y < dimension; y++) {
-				cellArray[x][y] = dimension * dimension - 2 - ((x % dimension) + (y * dimension));
+				cellArray[x][y] = dimension * dimension - 2 
+						- ((x % dimension) + (y * dimension));
 			}
 		}
+		
 		// set the empty tile to be the lower right one
 		cellArray[dimension - 1][dimension - 1] = dimension * dimension - 1;
 		
@@ -174,10 +177,12 @@ public class GamePlay extends Activity {
 	    public View getView(int position, View convertView, ViewGroup parent) {
 	        ImageView imageView;
 	        
-	        // if there is no recyclable image view, create a new one and set its attributes
+	        // if there is no recyclable image view, create a new one and set 
+	        // its attributes
 	        if (convertView == null) {
 	            imageView = new ImageView(mContext);
-	            imageView.setLayoutParams(new GridView.LayoutParams(cellWidth, cellHeight));
+	            imageView.setLayoutParams(new 
+	            		GridView.LayoutParams(cellWidth, cellHeight));
 	            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 	            imageView.setPadding(3, 3, 3, 3);
 	            imageView.setBackgroundColor(Color.BLACK);
@@ -206,39 +211,42 @@ public class GamePlay extends Activity {
 	 */
 	public void handleClick() {
 		gridView.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, 
+					int position, long id) {
 				
-				// derive the x- and y- coordinates clicked from the gridviews clicked position
-				int cur_x = position % dimension;
-				int cur_y = position / dimension;
+				// derive the x- and y- coordinates clicked from the gridviews
+				// clicked position
+				int x = position % dimension;
+				int y = position / dimension;
 				
-				int empty_tile = dimension * dimension - 1;
+				// calculate the value of the empty tile
+				int empty = dimension * dimension - 1;
 				
 				// check to the right of tapped tile for empty tile
-				if ((cur_x + 1 < dimension) && (cellArray[cur_x + 1][cur_y] == empty_tile)) {
-					cellArray[cur_x + 1][cur_y] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = empty_tile;
+				if ((x + 1 < dimension) && (cellArray[x + 1][y] == empty)) {
+					cellArray[x + 1][y] = cellArray[x][y];
+					cellArray[x][y] = empty;
 					moves++;
 				}
 				
 				// check to the left of tapped tile for empty tile
-				else if ((cur_x - 1 >= 0) && (cellArray[cur_x - 1][cur_y] == empty_tile)) {
-					cellArray[cur_x - 1][cur_y] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = empty_tile;
+				else if ((x - 1 >= 0) && (cellArray[x - 1][y] == empty)) {
+					cellArray[x - 1][y] = cellArray[x][y];
+					cellArray[x][y] = empty;
 					moves++;
 				}
 				
 				// check below tapped tile for empty tile
-				else if ((cur_y + 1 < dimension) && (cellArray[cur_x][cur_y + 1] == empty_tile)) {
-					cellArray[cur_x][cur_y + 1] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = empty_tile;
+				else if ((y + 1 < dimension) && (cellArray[x][y + 1] == empty)) {
+					cellArray[x][y + 1] = cellArray[x][y];
+					cellArray[x][y] = empty;
 					moves++;
 				}
 				
 				// check above tapped tile for empty tile
-				else if ((cur_y - 1 >= 0) && (cellArray[cur_x][cur_y - 1] == empty_tile)) {
-					cellArray[cur_x][cur_y - 1] = cellArray[cur_x][cur_y];
-					cellArray[cur_x][cur_y] = empty_tile;
+				else if ((y - 1 >= 0) && (cellArray[x][y - 1] == empty)) {
+					cellArray[x][y - 1] = cellArray[x][y];
+					cellArray[x][y] = empty;
 					moves++;
 				}
 				
@@ -289,6 +297,7 @@ public class GamePlay extends Activity {
 		dimension = gameSave.getInt("dimension", 4);
 		imageID = gameSave.getInt("imageID", R.drawable.puzzle_0);
 		moves = gameSave.getInt("moves", 0);
+		newGame = gameSave.getBoolean("newGame", true);
 		
 		// load the 'array' with the tile positions
 		cellArray = new int[dimension][dimension];
@@ -317,6 +326,7 @@ public class GamePlay extends Activity {
     	editor.putInt("dimension", dimension);
     	editor.putInt("imageID", imageID);
     	editor.putInt("moves", moves);
+    	editor.putBoolean("newGame", newGame);
     	
     	for(int x = 0; x < dimension; x++)
         	for(int y = 0; y < dimension; y++)
@@ -328,14 +338,16 @@ public class GamePlay extends Activity {
 	}
 	
 	public void deleteData() {
+		newGame = true;
+		
 		SharedPreferences gameSave = getSharedPreferences("gameSave", 0);
     	SharedPreferences.Editor editor = gameSave.edit();
 		editor.clear();
 		editor.putInt("dimension", dimension);
     	editor.putInt("imageID", imageID);
+    	editor.putBoolean("newGame", newGame);
 		editor.commit();
 		moves = 0;
-		doSave = false;
 	}
 	
 	/*

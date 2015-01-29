@@ -43,7 +43,6 @@ class ImageAdapter extends BaseAdapter {
 	
 	// Constructor
 	public ImageAdapter(Context c) {
-		//super();
 
 		myContext = c;
 
@@ -57,12 +56,9 @@ class ImageAdapter extends BaseAdapter {
 		
 		int count = 0, index = 0, j = list.length;
 
-		// We first need to figure out how many of our images we have before
-		// we can request the memory for an array of integers to hold their contents.
-
 		// loop over all of the fields in the R.drawable class
 		for(int i=0; i < j; i++)
-			// if the name starts with img_ then we have one of our images!
+			// if the name starts with puzzle_ then we have one of our images!
 			if(list[i].getName().startsWith("puzzle_")) count++;
 
 		// We now know how many images we have. Reserve the memory for an 
@@ -70,15 +66,13 @@ class ImageAdapter extends BaseAdapter {
 		images = new Integer[count];
 		cache = new Bitmap[count];
 
-		// Next, (unsafely) try to get the values of each of those fields
+		// Next, try to get the values of each of those fields
 		// into the images array.
 		try {
 			for(int i=0; i < j; i++)
 				if(list[i].getName().startsWith("puzzle_"))
 					images[index++] = list[i].getInt(null);
 		} catch(Exception e) {}
-		// safer: catch IllegalArgumentException & IllegalAccessException
-
 	}
 
 	@Override
